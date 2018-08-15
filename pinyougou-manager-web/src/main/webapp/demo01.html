@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>入门</title>
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <!--<script type="text/javascript" src="properties/data.json"></script>-->
+    <script>
+        //定义了一个叫myApp的模块
+        var app=angular.module("myapp",[]);
+        //定义控制器 //注入
+        app.controller("mycontroller",function($scope,$http){
+            $scope.findAll=function() {
+              //引入数据
+                $http.get("properties/data.json").success(function (response) {
+                    $scope.list = response;
+                })
+            }
+        })
+    </script>
+</head>
+<body ng-app="myapp" ng-controller="mycontroller" ng-init="findAll()">
+<table>
+    <tr>
+        <td>姓名</td>
+        <td>数学</td>
+    </tr>
+     <tr ng-repeat="x in list">
+       <td>{{x.name}}</td>
+       <td>{{x.shuxue}}</td>
+   </tr>
+</table>
+
+</body>
+</html>
