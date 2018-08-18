@@ -92,7 +92,7 @@
     where id = #{id,jdbcType=BIGINT}
   </delete>
   <delete id="deleteByExample" parameterType="com.pinyougou.pojo.TbBrandExample" >
-    delete from tb_brand
+      delete from tb_brand
     <if test="_parameter != null" >
       <include refid="Example_Where_Clause" />
     </if>
