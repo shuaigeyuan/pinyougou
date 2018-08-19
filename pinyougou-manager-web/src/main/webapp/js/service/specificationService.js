@@ -26,7 +26,12 @@ app.service('specificationService',function($http){
 		return $http.get('../specification/delete.do?ids='+ids);
 	}
 	//搜索
-	this.search=function(page,rows,searchEntity){
-		return $http.post('../specification/search.do?page='+page+"&rows="+rows, searchEntity);
-	}    	
+	this.search=function(page,rows,searchEntity) {
+        return $http.post('../specification/search.do?page=' + page + "&rows=" + rows, searchEntity);
+    }
+	//查询所有的规格id和name
+    this.selectSpecList=function(){
+        return $http.post('../specification/selectSpecList.do');
+	}
+
 });

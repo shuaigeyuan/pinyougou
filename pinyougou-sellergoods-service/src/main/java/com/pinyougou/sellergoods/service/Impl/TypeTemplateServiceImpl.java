@@ -46,7 +46,7 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 	 */
 	@Override
 	public void add(TbTypeTemplate typeTemplate) {
-		typeTemplateMapper.insert(typeTemplate);		
+		typeTemplateMapper.insert(typeTemplate);
 	}
 
 	

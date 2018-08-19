@@ -1,4 +1,5 @@
 package com.pinyougou.sellergoods.service.Impl;
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
@@ -46,7 +47,10 @@ public class SellerServiceImpl implements SellerService {
 	 */
 	@Override
 	public void add(TbSeller seller) {
-		sellerMapper.insert(seller);		
+		//商家申请
+		seller.setStatus("0");//设置为不可用，需等到运营商审核时设置为1
+		seller.setCreateTime(new Date());
+		sellerMapper.insert(seller);
 	}
 
 	
@@ -109,7 +113,7 @@ public class SellerServiceImpl implements SellerService {
 				criteria.andTelephoneLike("%"+seller.getTelephone()+"%");
 			}
 			if(seller.getStatus()!=null && seller.getStatus().length()>0){
-				criteria.andStatusLike("%"+seller.getStatus()+"%");
+				criteria.andStatusEqualTo(seller.getStatus());
 			}
 			if(seller.getAddressDetail()!=null && seller.getAddressDetail().length()>0){
 				criteria.andAddressDetailLike("%"+seller.getAddressDetail()+"%");
@@ -159,5 +163,12 @@ public class SellerServiceImpl implements SellerService {
 		Page<TbSeller> page= (Page<TbSeller>)sellerMapper.selectByExample(example);		
 		return new PageResult(page.getTotal(), page.getResult());
 	}
-	
+
+	@Override
+	public void updateStatus(String sellerId, String status) {
+		TbSeller tbSeller = sellerMapper.selectByPrimaryKey(sellerId);
+		tbSeller.setStatus(status);
+		sellerMapper.updateByPrimaryKey(tbSeller);
+	}
+
 }

@@ -26,7 +26,8 @@ app.controller('specificationController' ,function($scope,$controller,specificat
 	$scope.findOne=function(id){				
 		specificationService.findOne(id).success(
 			function(response){
-				$scope.entity= response;					
+				$scope.entity= response;
+
 			}
 		);				
 	}
@@ -83,5 +84,5 @@ app.controller('specificationController' ,function($scope,$controller,specificat
     $scope.deleteTableRow = function(index) {
         $scope.entity.tbSpecificationOptionList.splice(index,1);
     }
-    
+
 });	

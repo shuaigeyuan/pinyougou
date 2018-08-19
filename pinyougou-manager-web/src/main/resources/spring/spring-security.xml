@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+             http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/security
+        http://www.springframework.org/schema/security/spring-security.xsd">
+<!--以下页面不拦截-->
+    <http pattern="/login.html" security="none"></http>
+     <http pattern="/css/**" security="none"></http>
+    <http pattern="/js/**" security="none"></http>
+    <http pattern="/img/**" security="none"></http>
+    <http pattern="/plugins/**" security="none"></http>
+    <!--页面拦截规则-->
+    <http use-expressions="false">
+        <intercept-url pattern="/assets/img/favicon.ico" access="IS_AUTHENTICATED_ANONYMOUSLY"></intercept-url>
+        <!--授权  pattern 表示要拦截的页面 access 表示允许访问上述页面的角色-->
+        <intercept-url pattern="/**" access="ROLE_USER"></intercept-url>
+        <!-- 认证-->
+        <form-login login-page="/login.html" default-target-url="/admin/index.html"  authentication-failure-url="/login.html" ></form-login>
+
+        <csrf disabled="true"></csrf>
+       <headers>
+            <frame-options policy="SAMEORIGIN"/>
+        </headers>
+        <logout/>
+        <!--加此配置后，会自动的产生退出登录的地址/logout,如果你不想用这个地址，你也可以定义生成的退出地址以及跳转的页面，配置如下-->
+    </http>
+     <!--认证管理器-->
+        <authentication-manager>
+       <authentication-provider>
+            <user-service>
+                <user name="yuanhua" password="shuaige" authorities="ROLE_USER"></user>
+            </user-service>
+       </authentication-provider>
+        </authentication-manager>
+</beans:beans>

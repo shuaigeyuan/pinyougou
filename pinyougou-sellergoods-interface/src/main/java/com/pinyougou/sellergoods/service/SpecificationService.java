@@ -1,7 +1,8 @@
 package com.pinyougou.sellergoods.service;
 import java.util.List;
-import com.pinyougou.pojo.TbSpecification;
+import java.util.Map;
 
+import com.pinyougou.pojo.TbSpecification;
 import com.pinyougou.pojogroup.Specification;
 import entity.PageResult;
 /**
@@ -58,5 +59,7 @@ public interface SpecificationService {
 	 * @return
 	 */
 	public PageResult findPage(TbSpecification specification, int pageNum, int pageSize);
-	
+
+    List<Map> selectSpecList();
+
 }
