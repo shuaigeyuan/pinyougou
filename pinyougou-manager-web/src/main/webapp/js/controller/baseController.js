@@ -29,6 +29,7 @@ app.controller('baseController' ,function($scope){
             $scope.selectIds.splice(idx, 1);//删除 
 		}
 	}
+
      //将一个json字符串转成制定的格式（以其一个数组里面的对象的属性值 通过“，”拼接起来）
      $scope.jsonToString=function (jsonString,key) {
 		 //1.将json字符转换成json对象  angular.fromJSON(jsonString);

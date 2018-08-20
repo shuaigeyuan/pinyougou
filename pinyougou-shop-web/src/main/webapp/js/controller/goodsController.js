@@ -10,18 +10,7 @@ app.controller('goodsController' ,function($scope,$controller,goodsService){
 				$scope.list=response;
 			}			
 		);
-	}    
-	
-	//分页
-	$scope.findPage=function(page,rows){			
-		goodsService.findPage(page,rows).success(
-			function(response){
-				$scope.list=response.rows;	
-				$scope.paginationConf.totalItems=response.total;//更新总记录数
-			}			
-		);
 	}
-	
 	//查询实体 
 	$scope.findOne=function(id){				
 		goodsService.findOne(id).success(
@@ -63,17 +52,23 @@ app.controller('goodsController' ,function($scope,$controller,goodsService){
 			}		
 		);				
 	}
-	
-	$scope.searchEntity={};//定义搜索对象 
-	
-	//搜索
-	$scope.search=function(page,rows){			
-		goodsService.search(page,rows,$scope.searchEntity).success(
-			function(response){
-				$scope.list=response.rows;	
-				$scope.paginationConf.totalItems=response.total;//更新总记录数
-			}			
-		);
+
+//添加
+	$scope.add=function(){
+		$scope.entity.tbGoodsDesc.introduction=editor.html();
+        goodsService.add($scope.entity).success(
+        	function (response) {
+				if (response.success){
+                    //清空表格
+					$scope.entity={};
+                    editor.html('');//清空富文本编辑器
+				}else{
+                    alert(response.message);
+				}
+
+            }
+		)
 	}
-    
+
+
 });	

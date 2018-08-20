@@ -80,7 +80,8 @@ public class ItemCatController {
 	 */
 	@RequestMapping("/findOne")
 	public TbItemCat findOne(Long id){
-		return itemCatService.findOne(id);		
+
+		return itemCatService.findOne(id);
 	}
 	
 	/**
@@ -110,5 +111,15 @@ public class ItemCatController {
 	public PageResult search(@RequestBody TbItemCat itemCat, int page, int rows  ){
 		return itemCatService.findPage(itemCat, page, rows);		
 	}
-	
+	/**
+	 * 根据上级ID查询列表
+	 * @paramparentId
+	 * @return
+	 */
+	@RequestMapping("/findByParentId.do")
+	public List<TbItemCat> findByParentId(Long parentId){
+		List<TbItemCat> list = itemCatService.findByParentId(parentId);
+		System.out.println(list);
+		return list;
+	}
 }

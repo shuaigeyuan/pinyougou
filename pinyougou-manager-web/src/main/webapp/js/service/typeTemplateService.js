@@ -28,5 +28,9 @@ app.service('typeTemplateService',function($http){
 	//搜索
 	this.search=function(page,rows,searchEntity){
 		return $http.post('../typeTemplate/search.do?page='+page+"&rows="+rows, searchEntity);
-	}    	
+	}
+    //查询所有的模板,返回id和name
+    this.selectTypeList=function(){
+        return $http.post('../typeTemplate/selectTypeList.do');
+    }
 });
