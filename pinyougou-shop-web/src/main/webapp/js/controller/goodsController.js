@@ -1,5 +1,5 @@
  //控制层 
-app.controller('goodsController' ,function($scope,$controller,goodsService){
+app.controller('goodsController' ,function($scope,$controller,goodsService,uploadService,itemCatService,typeTemplateService){
 	
 	$controller('baseController',{$scope:$scope});//继承
 	
@@ -53,6 +53,9 @@ app.controller('goodsController' ,function($scope,$controller,goodsService){
 		);				
 	}
 
+
+
+
 //添加
 	$scope.add=function(){
 		$scope.entity.tbGoodsDesc.introduction=editor.html();
@@ -69,6 +72,116 @@ app.controller('goodsController' ,function($scope,$controller,goodsService){
             }
 		)
 	}
+    //定义页面实体结构
+    $scope.entity={tbGoods:{},tbGoodsDesc:{itemImages:[],specificationItems:[]}};
+	//上传文件
+    $scope.uploadFile=function(){
+        uploadService.uploadFile().success(function (response) {
+            if (response.success){
+                //如果上传成功，取出url
+                $scope.image_entity.url=response.message;//设置文件地址
+            }else{
+                alert(response.message);
+            }
+        }).error(function () {
+        	alert("上传错误");
+			
+        })
+
+	}
+
+    //添加图片列表
+	$scope.add_image_entity=function() {
+        $scope.entity.tbGoodsDesc.itemImages.push($scope.image_entity)//设置文件地址
+    }
+    //列表中移除图片
+    $scope.remove_image_entity=function(index){
+        $scope.entity.tbGoodsDesc.itemImages.splice(index,1);
+    }
+    //读取一级分类
+	$scope.selectItemCatList=function(){
+    	itemCatService.findByParentId(0).success(function (response) {
+		   $scope.itemCat1List=response;
+        })
+	}
+	//监控一级分类(category1Id)的变化,从而实现二级分类的下拉列表
+	$scope.$watch("entity.tbGoods.category1Id",function (newValue,oldValue) {
+        if(newValue !=null &&newValue !=undefined) {
+            //根据选择的值，查询二级分类
+            itemCatService.findByParentId(newValue).success(function (response) {
+                $scope.itemCat2List = response;
+            })
+        }
+    })
+    //监控二级分类(category2Id)的变化,从而实现二级分类的下拉列表
+    $scope.$watch("entity.tbGoods.category2Id",function (newValue,oldValue) {
+        if(newValue !=null &&newValue !=undefined) {
+            //根据选择的值，查询三级分类
+            itemCatService.findByParentId(newValue).success(function (response) {
+                $scope.itemCat3List = response;
+            })
+        }
+    })
+    //监控三级分类(category3Id)的变化,读取模板id(typeTemplateId)
+    $scope.$watch("entity.tbGoods.category3Id",function (newValue,oldValue) {
+    	if(newValue !=null &&newValue !=undefined){
+        //根据选择的值，查询模板Id
+        itemCatService.findOne(newValue).success(function (response) {
+            $scope.entity.tbGoods.typeTemplateId=response.typeId;
+        })
+        }
+    })
+
+      //模板ID选择后  更新品牌列表
+        $scope.$watch("entity.tbGoods.typeTemplateId",function (newValue,oldValue) {
+            if(newValue !=null && newValue !=undefined){
+                //根据选择的值，查询模板Id
+                typeTemplateService.findOne(newValue).success(function (response) {
+                    $scope.typeTemplate=response;//获取类型模板
+                    $scope.typeTemplate.brandIds= JSON.parse( $scope.typeTemplate.brandIds);//品牌列表
+					//在用户更新模板ID时，读取模板中的扩展属性赋给商品的扩展属性。
+                    $scope.entity.tbGoodsDesc.customAttributeItems=JSON.parse($scope.typeTemplate.customAttributeItems);
+                    $scope.entity.tbGoodsDesc.specIds=angular.fromJson($scope.typeTemplate.specIds);
+						//{"rows":[{"brandIds":"[{\"id\":1,\"text\":\"联想\"},{\"id\":3,\"text\":\"三星\"},{\"id\":2,\"text\":\"华为\"},{\"id\":5,\"text\":\"OPPO\"},{\"id\":4,\"text\":\"小米\"},{\"id\":9,\"text\":\"苹果\"},{\"id\":8,\"text\":\"魅族\"},{\"id\":6,\"text\":\"360\"},{\"id\":10,\"text\":\"VIVO\"},{\"id\":11,\"text\":\"诺基亚\"},{\"id\":12,\"text\":\"锤子\"}]","customAttributeItems":"[{\"text\":\"内存大小\"},{\"text\":\"颜色\"},{\"text\":\"核心\"}]","id":35,"name":"手机","specIds":"[{\"id\":27,\"text\":\"网络\"},{\"id\":32,\"text\":\"机身内存\"}]"},{"brandIds":"[{\"id\":16,\"text\":\"TCL\"},{\"id\":13,\"text\":\"长虹\"},{\"id\":14,\"text\":\"海尔\"},{\"id\":19,\"text\":\"创维\"},{\"id\":21,\"text\":\"康佳\"},{\"id\":18,\"text\":\"夏普\"},{\"id\":17,\"text\":\"海信\"},{\"id\":20,\"text\":\"东芝\"},{\"id\":15,\"text\":\"飞利浦\"},{\"id\":22,\"text\":\"LG\"}]","customAttributeItems":"[]","id":37,"name":"电视","specIds":"[{\"id\":33,\"text\":\"电视屏幕尺寸\"}]"},{"brandIds":"[{\"id\":3,\"text\":\"三星\"},{\"id\":7,\"text\":\"中兴\"},{\"id\":9,\"text\":\"苹果\"}]","customAttributeItems":"[{\"text\":\"外观\"},{\"text\":\"大小\"},{\"text\":\"重量\"}]","id":38,"name":null,"specIds":"[{\"id\":28,\"text\":\"手机屏幕尺寸\"},{\"id\":33,\"text\":\"电视屏幕尺寸\"},{\"id\":27,\"text\":\"网络\"}]"},{"brandIds":"[{\"id\":3,\"text\":\"三星\"},{\"id\":7,\"text\":\"中兴\"},{\"id\":13,\"text\":\"长虹\"}]","customAttributeItems":"[{\"text\":\"重量\"},{\"text\":\"大小\"}]","id":40,"name":"电脑","specIds":"[{\"id\":27,\"text\":\"网络\"},{\"id\":28,\"text\":\"手机屏幕尺寸\"}]"}],"total":4}
+                    /*从数据库中查询出来的是字符串，我们必须将其转换为json对象才能实现信息的回显，共有以下两种方式
+                    $scope.entity.brandIds=  JSON.parse($scope.entity.brandIds);//转换品牌列表
+                  $scope.entity.specIds=  JSON.parse($scope.entity.specIds);//转换规格列表
+                  $scope.entity.customAttributeItems= JSON.parse($scope.entity.customAttributeItems);//转换扩展属性*/
+                   /* $scope.entity.brandIds=angular.fromJson($scope.entity.brandIds);
+                    $scope.entity.specIds=angular.fromJson($scope.entity.specIds);
+                    $scope.entity.customAttributeItems=angular.fromJson($scope.entity.customAttributeItems);*/
+                })
+				//获取[{"id":27,"text":"网络","options":[{},{}] },"id":27,"text":"网络","options":[{},{}] }]
+                typeTemplateService.findSpecList(newValue).success(function (response) {
+                    $scope.specList=response;
+                })
+            }
+        })
 
 
-});	
+//保存选中规格的选项   $scope.entity.goodsDesc.specificationItems=
+// [{"attributeName":"网络制式","attributeValue":["移动3G","移动4G"]},{"attributeName":"屏幕尺寸","attributeValue":["6寸","5.5寸"]}]
+   $scope.updateSpecAttribute=function($event,specName,specValue){
+   	//从已有的数组中获取对象
+        var obj=$scope.searchObjectByKey($scope.entity.tbGoodsDesc.specificationItems,specName,"attributeName");
+//判断获取的对象是否存在
+	   if (obj !=null){    //{"attributeName":"网络制式","attributeValue":["移动3G","移动4G"]}
+       //在已有的数组中存在该属性,不需要新增规格属性
+		   //判断是否已经选中
+		   if($event.target.checked){
+		   //如果选项处于选中就直接添加
+       obj.attributeValue.push(specValue);
+		   }else{//如果选项取消了，将此条记录移除
+   obj.attributeValue.slice(obj.attributeValue.indexOf(specValue),1);
+   //如果属性中都没有被勾选,就将该属性移除
+			   if (obj.attributeValue.length==0){
+			   	$scope.entity.tbGoodsDesc.specificationItems.slice($scope.entity.tbGoodsDesc.specificationItems.indexOf(obj),1);
+			   }
+		   }
+	   }else{
+	   	//已有的数组中,不存在该属性,需要新增规格属性
+           $scope.entity.tbGoodsDesc.specificationItems.push(
+               {"attributeName":specName,"attributeValue":[specValue]});
+	   }
+   }
+    })

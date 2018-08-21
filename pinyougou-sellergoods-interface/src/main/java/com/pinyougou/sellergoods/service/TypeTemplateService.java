@@ -61,5 +61,6 @@ public interface TypeTemplateService {
 	public PageResult findPage(TbTypeTemplate typeTemplate, int pageNum, int pageSize);
 
     List<Map> selectTypeList();
-
+//通过模板id获取spec_ids
+    List<Map> findSpecList(Long id);
 }

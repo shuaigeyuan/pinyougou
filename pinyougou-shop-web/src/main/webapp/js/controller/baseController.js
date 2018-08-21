@@ -40,4 +40,17 @@ app.controller('baseController' ,function($scope){
 		}
 		return str;
      }
+//{"attributeName":"网络制式","attributeValue":["移动3G","移动4G"]}
+	//specName------网络制式        key------attributeName
+     //从前端获取的规格属性 是否存在在 现有的list集合中
+	//如果存在,则直接返回原有对象,并后续添加属性值即可,如果不存在,返回null;
+	$scope.searchObjectByKey=function(list,specName,key){
+       for (var i=0;i<list.length;i++){
+       	var obj=list[i];//{"attributeName":"网络制式","attributeValue":["移动3G","移动4G"]}
+		   if (obj[key]==specName){
+		   	return obj;
+		   }
+	   }
+	   return null;
+	}
 });	

@@ -1,17 +1,16 @@
 package com.pinyougou.shop.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.pinyougou.pojo.TbGoods;
-import com.pinyougou.pojogroup.Goods;
-import com.pinyougou.sellergoods.service.GoodsService;
+import com.pinyougou.pojo.TbBrand;
+import com.pinyougou.sellergoods.service.BrandService;
 import entity.PageResult;
 import entity.Result;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * controller
@@ -19,19 +18,19 @@ import java.util.List;
  *
  */
 @RestController
-@RequestMapping("/goods")
-public class GoodsController {
+@RequestMapping("/brand")
+public class BrandController {
 
 	@Reference
-	private GoodsService goodsService;
+	private BrandService brandService;
 	
 	/**
 	 * 返回全部列表
 	 * @return
 	 */
 	@RequestMapping("/findAll")
-	public List<TbGoods> findAll(){			
-		return goodsService.findAll();
+	public List<TbBrand> findAll(){			
+		return brandService.findAll();
 	}
 	
 	
@@ -41,23 +40,18 @@ public class GoodsController {
 	 */
 	@RequestMapping("/findPage")
 	public PageResult  findPage(int page,int rows){			
-		return goodsService.findPage(page, rows);
+		return brandService.findPage(page, rows);
 	}
 	
 	/**
 	 * 增加
-	 * @param goods
+	 * @param brand
 	 * @return
 	 */
 	@RequestMapping("/add")
-	public Result add(@RequestBody Goods goods){
-		System.out.println(goods);
-		//获取登录名
-		String sellerId= SecurityContextHolder.getContext().getAuthentication().getName();
-		//设置商家ID
-		goods.getTbGoods().setSellerId(sellerId);
+	public Result add(@RequestBody TbBrand brand){
 		try {
-			goodsService.add(goods);
+			brandService.add(brand);
 			return new Result(true, "增加成功");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -67,13 +61,13 @@ public class GoodsController {
 	
 	/**
 	 * 修改
-	 * @param goods
+	 * @param brand
 	 * @return
 	 */
 	@RequestMapping("/update")
-	public Result update(@RequestBody TbGoods goods){
+	public Result update(@RequestBody TbBrand brand){
 		try {
-			goodsService.update(goods);
+			brandService.update(brand);
 			return new Result(true, "修改成功");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -87,8 +81,8 @@ public class GoodsController {
 	 * @return
 	 */
 	@RequestMapping("/findOne")
-	public TbGoods findOne(Long id){
-		return goodsService.findOne(id);		
+	public TbBrand findOne(Long id){
+		return brandService.findOne(id);		
 	}
 	
 	/**
@@ -99,7 +93,7 @@ public class GoodsController {
 	@RequestMapping("/delete")
 	public Result delete(Long [] ids){
 		try {
-			goodsService.delete(ids);
+			brandService.delete(ids);
 			return new Result(true, "删除成功"); 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -110,15 +104,21 @@ public class GoodsController {
 		/**
 	 * 查询+分页
 	 * @param brand
-	 * @param page
-	 * @param rows
+	 * @param pageNum
+	 * @param pageSize
 	 * @return
 	 */
 	@RequestMapping("/search")
-	public PageResult search(@RequestBody TbGoods goods, int page, int rows  ){
-		return goodsService.findPage(goods, page, rows);		
+	public PageResult search(@RequestBody TbBrand brand, int page, int rows  ){
+		return brandService.findPage(brand, page, rows);
 	}
+		/*
+	查询所有的品牌	$scope.brandList={data:maps};
+	 */
 
-
-
+	@RequestMapping("/selectOptionList")
+	public  List<Map>  selectOptionList(){
+		List<Map> maps = brandService.selectOptionList();
+		return  maps;
+	}
 }
