@@ -11,7 +11,7 @@ app.controller('baseController' ,function($scope){
 	$scope.paginationConf = {
          currentPage: 1,
          totalItems: 10,
-         itemsPerPage: 5,
+         itemsPerPage: 10,
          perPageOptions: [5,10, 20, 30, 40, 50],
          onChange: function(){
         	 $scope.reloadList();//重新加载
@@ -23,13 +23,12 @@ app.controller('baseController' ,function($scope){
 	//更新复选
 	$scope.updateSelection = function($event, id) {		
 		if($event.target.checked){//如果是被选中,则增加到数组
-			$scope.selectIds.push(id);
+			$scope.selectIds.push( id);			
 		}else{
 			var idx = $scope.selectIds.indexOf(id);
             $scope.selectIds.splice(idx, 1);//删除 
 		}
 	}
-
      //将一个json字符串转成制定的格式（以其一个数组里面的对象的属性值 通过“，”拼接起来）
      $scope.jsonToString=function (jsonString,key) {
 		 //1.将json字符转换成json对象  angular.fromJSON(jsonString);
@@ -41,4 +40,17 @@ app.controller('baseController' ,function($scope){
 		}
 		return str;
      }
+//{"attributeName":"网络制式","attributeValue":["移动3G","移动4G"]}
+	//specName------网络制式        key------attributeName
+     //从前端获取的规格属性 判断是否存在在 现有的list集合中
+	//如果存在,则直接返回原有对象,并后续添加属性值即可,如果不存在,返回null;
+	$scope.searchObjectByKey=function(list,specName,key){
+       for (var i=0;i<list.length;i++){
+       	var object=list[i];     //{"attributeName":"网络制式","attributeValue":["移动3G","移动4G"]}
+		   if (object[key]==specName){
+		   	return object;
+		   }
+	   }
+	   return null;
+	}
 });	

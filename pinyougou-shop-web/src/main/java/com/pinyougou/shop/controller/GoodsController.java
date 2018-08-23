@@ -40,7 +40,8 @@ public class GoodsController {
 	 * @return
 	 */
 	@RequestMapping("/findPage")
-	public PageResult  findPage(int page,int rows){			
+	public PageResult  findPage(int page,int rows){
+
 		return goodsService.findPage(page, rows);
 	}
 	
@@ -71,8 +72,18 @@ public class GoodsController {
 	 * @return
 	 */
 	@RequestMapping("/update")
-	public Result update(@RequestBody TbGoods goods){
+	public Result update(@RequestBody Goods goods){
 		try {
+			//获取初始创建用户
+			Goods goods1 = goodsService.findOne(goods.getTbGoods().getId());
+			String id = goods1.getTbGoods().getSellerId();
+			//需要将商家id设置为当前登陆用户的id
+			String sellerId = SecurityContextHolder.getContext().getAuthentication().getName();
+			goods.getTbGoods().setSellerId(sellerId);
+			//如果不是初始创建用户的id，就报警
+			if(!id.equals(sellerId)){
+				return new Result(false, "操作非法");
+			}
 			goodsService.update(goods);
 			return new Result(true, "修改成功");
 		} catch (Exception e) {
@@ -87,8 +98,8 @@ public class GoodsController {
 	 * @return
 	 */
 	@RequestMapping("/findOne")
-	public TbGoods findOne(Long id){
-		return goodsService.findOne(id);		
+	public Goods findOne(Long id){
+		return goodsService.findOne(id);
 	}
 	
 	/**
@@ -115,9 +126,14 @@ public class GoodsController {
 	 * @return
 	 */
 	@RequestMapping("/search")
-	public PageResult search(@RequestBody TbGoods goods, int page, int rows  ){
+	public PageResult search(@RequestBody TbGoods goods,int page,int rows){
+		//获取商家ID
+		String sellerId = SecurityContextHolder.getContext().getAuthentication().getName();
+		//将商家id设置 到tbGoods
+		goods.setSellerId(sellerId);
 		return goodsService.findPage(goods, page, rows);		
 	}
+
 
 
 

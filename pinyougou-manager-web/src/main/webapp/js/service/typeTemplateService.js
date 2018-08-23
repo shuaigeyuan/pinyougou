@@ -33,4 +33,8 @@ app.service('typeTemplateService',function($http){
     this.selectTypeList=function(){
         return $http.post('../typeTemplate/selectTypeList.do');
     }
+    //查询规格列表
+    this.findSpecList=function(id){
+        return $http.get('../typeTemplate/findSpecList.do?id='+id);
+    }
 });

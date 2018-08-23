@@ -1,5 +1,5 @@
  //控制层 
-app.controller('goodsController' ,function($scope,$controller,goodsService,uploadService,itemCatService,typeTemplateService) {
+app.controller('goodsController' ,function($scope,$controller,goodsService,$location,uploadService,itemCatService,typeTemplateService) {
 
     $controller('baseController', {$scope: $scope});//继承
 
@@ -11,51 +11,34 @@ app.controller('goodsController' ,function($scope,$controller,goodsService,uploa
             }
         );
     }
-    //查询实体
-    $scope.findOne = function (id) {
-        goodsService.findOne(id).success(
-            function (response) {
-                $scope.entity = response;
-            }
-        );
-    }
 
     //保存
     $scope.save = function () {
         var serviceObject;//服务层对象
-        if ($scope.entity.id != null) {//如果有ID
+        if ($scope.entity.tbGoods.id != null) {//如果有ID
             serviceObject = goodsService.update($scope.entity); //修改
         } else {
+            //富文本编辑器的转化
+            $scope.entity.tbGoodsDesc.introduction = editor.html();
             serviceObject = goodsService.add($scope.entity);//增加
         }
         serviceObject.success(
             function (response) {
                 if (response.success) {
-                    //重新查询
-                    $scope.reloadList();//重新加载
+                    //清空表格
+                    $scope.entity = {};
+                    editor.html('');//清空富文本编辑器
+                    //保存成功后跳转到商品列表页面
+                    window.location.href="goods.html";
                 } else {
                     alert(response.message);
                 }
             }
         );
     }
-
-
-    //批量删除
-    $scope.dele = function () {
-        //获取选中的复选框
-        goodsService.dele($scope.selectIds).success(
-            function (response) {
-                if (response.success) {
-                    $scope.reloadList();//刷新列表
-                }
-            }
-        );
-    }
-
-
 //添加
-    $scope.add = function () {
+   /* $scope.add = function () {
+        //富文本编辑器的转化
         $scope.entity.tbGoodsDesc.introduction = editor.html();
         goodsService.add($scope.entity).success(
             function (response) {
@@ -69,7 +52,7 @@ app.controller('goodsController' ,function($scope,$controller,goodsService,uploa
 
             }
         )
-    }
+    }*/
     //定义页面实体结构specificationItems用于规格遍历,tbItemList用于规格选取后,下端生成组合规格表
     $scope.entity = {tbGoods: {}, tbGoodsDesc: {itemImages: [], specificationItems: []}, tbItemList: []};
 
@@ -139,7 +122,9 @@ app.controller('goodsController' ,function($scope,$controller,goodsService,uploa
                 $scope.typeTemplate = response;//获取类型模板
                 $scope.typeTemplate.brandIds = JSON.parse($scope.typeTemplate.brandIds);//品牌列表
                 //在用户更新模板ID时，读取模板中的扩展属性赋给商品的扩展属性。
+                if($location.search()['id']==null){  //判断是否存在id,id为空则新增空的模板
                 $scope.entity.tbGoodsDesc.customAttributeItems = JSON.parse($scope.typeTemplate.customAttributeItems);
+                }
                 $scope.entity.tbGoodsDesc.specIds = angular.fromJson($scope.typeTemplate.specIds);
                 //{"rows":[{"brandIds":"[{\"id\":1,\"text\":\"联想\"},{\"id\":3,\"text\":\"三星\"},{\"id\":2,\"text\":\"华为\"},{\"id\":5,\"text\":\"OPPO\"},{\"id\":4,\"text\":\"小米\"},{\"id\":9,\"text\":\"苹果\"},{\"id\":8,\"text\":\"魅族\"},{\"id\":6,\"text\":\"360\"},{\"id\":10,\"text\":\"VIVO\"},{\"id\":11,\"text\":\"诺基亚\"},{\"id\":12,\"text\":\"锤子\"}]","customAttributeItems":"[{\"text\":\"内存大小\"},{\"text\":\"颜色\"},{\"text\":\"核心\"}]","id":35,"name":"手机","specIds":"[{\"id\":27,\"text\":\"网络\"},{\"id\":32,\"text\":\"机身内存\"}]"},{"brandIds":"[{\"id\":16,\"text\":\"TCL\"},{\"id\":13,\"text\":\"长虹\"},{\"id\":14,\"text\":\"海尔\"},{\"id\":19,\"text\":\"创维\"},{\"id\":21,\"text\":\"康佳\"},{\"id\":18,\"text\":\"夏普\"},{\"id\":17,\"text\":\"海信\"},{\"id\":20,\"text\":\"东芝\"},{\"id\":15,\"text\":\"飞利浦\"},{\"id\":22,\"text\":\"LG\"}]","customAttributeItems":"[]","id":37,"name":"电视","specIds":"[{\"id\":33,\"text\":\"电视屏幕尺寸\"}]"},{"brandIds":"[{\"id\":3,\"text\":\"三星\"},{\"id\":7,\"text\":\"中兴\"},{\"id\":9,\"text\":\"苹果\"}]","customAttributeItems":"[{\"text\":\"外观\"},{\"text\":\"大小\"},{\"text\":\"重量\"}]","id":38,"name":null,"specIds":"[{\"id\":28,\"text\":\"手机屏幕尺寸\"},{\"id\":33,\"text\":\"电视屏幕尺寸\"},{\"id\":27,\"text\":\"网络\"}]"},{"brandIds":"[{\"id\":3,\"text\":\"三星\"},{\"id\":7,\"text\":\"中兴\"},{\"id\":13,\"text\":\"长虹\"}]","customAttributeItems":"[{\"text\":\"重量\"},{\"text\":\"大小\"}]","id":40,"name":"电脑","specIds":"[{\"id\":27,\"text\":\"网络\"},{\"id\":28,\"text\":\"手机屏幕尺寸\"}]"}],"total":4}
                 /*从数据库中查询出来的是字符串，我们必须将其转换为json对象才能实现信息的回显，共有以下两种方式
@@ -215,5 +200,81 @@ app.controller('goodsController' ,function($scope,$controller,goodsService,uploa
             }
         }
             return newList;
+    }
+
+    $scope.searchEntity={};//定义搜索对象
+
+    //搜索
+    $scope.search=function(page,rows){
+        goodsService.search(page,rows,$scope.searchEntity).success(
+            function(response){
+                $scope.list=response.rows;
+                $scope.paginationConf.totalItems=response.total;//更新总记录数
+            }
+        );
+    }
+    //商品状态
+    $scope.status=['未审核','已审核','审核未通过','关闭'];
+    $scope.itemCatList=[];//商品分类列表
+    //查询所有的TbItemCat
+    $scope.findItemCatList=function(){
+        itemCatService.findAll().success(function (response) {
+            for(var i=0;i<response.length;i++){
+               $scope.itemCatList[response[i].id]=response[i].name;
+            }
+        })
+    }
+
+    //查询实体(回显)
+    $scope.findOne = function () {
+        var id =$location.search()['id'];
+        goodsService.findOne(id).success(
+            function (response) {
+                $scope.entity = response;
+                //富文本编辑的回显---商品介绍哦
+                editor.html($scope.entity.tbGoodsDesc.introduction);
+                //图片列表的回显
+              $scope.entity.tbGoodsDesc.itemImages=JSON.parse($scope.entity.tbGoodsDesc.itemImages);
+                //扩展属性列表的回显需要在新建的方法上面添加判断获取的id是否为空
+                $scope.entity.tbGoodsDesc.customAttributeItems=  JSON.parse($scope.entity.tbGoodsDesc.customAttributeItems);
+                //规格属性的回显
+               $scope.entity.tbGoodsDesc.specificationItems=JSON.parse($scope.entity.tbGoodsDesc.specificationItems);
+
+                //SKU列表规格列转换--将"spec":"{\"网络\":\"移动3G\",\"机身内存\":\"16G\"}"
+                // 转换成"spec":{"网络":"移动4G","机身内存":"32G"}
+                var tbItemList=$scope.entity.tbItemList;
+                for( var i=0;i<tbItemList.length;i++ ){
+                    //将字符串装换成json
+                  tbItemList[i].spec = JSON.parse(tbItemList[i].spec);
+                    //或者tbItemList[i].spec = angular.fromJson(tbItemList[i].spec);
+                }
+            }
+        );
+    }
+//根据规格名称和选项名称返回是否被勾选
+    $scope.checkAttributeValue=function(specName,specValue) {
+        var specificationItems = $scope.entity.tbGoodsDesc.specificationItems;
+        var object = $scope.searchObjectByKey(specificationItems,specName,'attributeName');
+        if(object==null){
+            return false;
+        }else{
+               if(object.attributeValue.indexOf(specValue)!=-1){
+                   return true;
+               }else{
+                   return false;
+               }
+        }
+    }
+
+    //商品列表的批量删除
+    $scope.dele = function () {
+        //获取选中的复选框
+        goodsService.dele($scope.selectIds).success(
+            function (response) {
+                if (response.success) {
+                    $scope.reloadList();//刷新列表
+                }
+            }
+        );
     }
 })

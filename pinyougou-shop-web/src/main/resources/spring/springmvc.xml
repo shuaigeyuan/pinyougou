@@ -11,7 +11,7 @@
        http://www.springframework.org/schema/mvc
        http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
     <!--引入配置文件-->
-    <context:property-placeholder location="classpath:config/resource.properties"></context:property-placeholder>
+    <context:property-placeholder location="classpath:config/*.properties"></context:property-placeholder>
     <!--配置应用名 服务消费方-->
     <dubbo:application name="pinyougou-shop-web"></dubbo:application>
     <!--配置注册中心-->
